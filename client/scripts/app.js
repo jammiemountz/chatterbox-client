@@ -11,6 +11,7 @@ var message = {
 
 var app = {
   init : function() {
+    app.addRoom("All");
     app.fetch();
   },
 
@@ -22,6 +23,8 @@ var app = {
     'roomname': '4chan'
   },
 
+  room : "All",
+
   server: 'https://api.parse.com/1/classes/chatterbox',
 
   send : function(message) {
@@ -32,25 +35,6 @@ var app = {
       data: JSON.stringify(message),
       contentType: 'application/json',
       success: function (data) {
-        console.log('chatterbox: Message sent');
-        // $('#chats').append("<div>" + data.results[0].username + ": " + data.results[0].text + "</div>")
-      },
-      error: function (data) {
-        // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
-        console.error('chatterbox: Failed to send message');
-      }
-    });
-  },
-
-  PM : function(message, to) {
-    $.ajax({
-      // always use this url
-      url: 'https://api.parse.com/1/users',
-      type: 'GET',
-      data: JSON.stringify(message),
-      contentType: 'application/json',
-      success: function (data) {
-        console.log(data);
         console.log('chatterbox: Message sent');
         // $('#chats').append("<div>" + data.results[0].username + ": " + data.results[0].text + "</div>")
       },
@@ -81,6 +65,11 @@ var app = {
     app.friends[friend] = true;
   },
 
+  changeRoom : function(room) {
+    app.room = room;
+    app.fetch();
+  },
+
   fetch : function() {
     app.clearMessages();
     $.ajax({
@@ -92,13 +81,18 @@ var app = {
       success: function (data) {
         // debugger;
         for (var i = 0; i < data.results.length; i++){
-          console.log(typeof data.results[i].text)
           if (data.results[i].text === undefined) {
             console.error('stop sending message assholes');
           } else if (data.results[i].text.includes("<")) {
             console.error('terrible thing avoided!!!11!');
-          } else {
-            $('#chats').append("<div class='username' id='chat'>" + data.results[i].username + ": " + data.results[i].text + "</div>")
+          } else if (app.room === "All" || app.room === data.results[i].roomname) {
+            if (!app.friends[data.results[i].username]) {
+              console.log('100 of me!!');
+              $('#chats').append("<div class='username' id='chat'>" + data.results[i].roomname + ": " + data.results[i].username + ": " + data.results[i].text + "</div>")
+            } else {
+              console.log('friend!!');
+              $('#chats').append("<div class='username' id='chat'>" + "[" + data.results[i].roomname + "]: <strong>" + data.results[i].username + "</strong>: " + data.results[i].text + "</div>")
+            }
           }
         }
       },
@@ -109,13 +103,15 @@ var app = {
     });
   }
 };
+
+
 $(document).ready(function() {
   $('#refresh').on('click', function() {
     app.fetch();
   });
 
   $('#main').on('click', '.username', function() {
-    app.addFriend(event.toElement.innerText.split(": ")[0]);
+    app.addFriend(event.toElement.innerText.split(": ")[1]);
   });
 
   //something on click
@@ -130,5 +126,10 @@ $(document).ready(function() {
     app.message.username = $('#fillme').val();
   });
 
+  $('#submitroom').on('click', function(){
+    app.addRoom($('#newroom').val());
+  });
+
+  app.init();
 });
-app.init();
+

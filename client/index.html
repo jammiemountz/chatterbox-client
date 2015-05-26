@@ -22,9 +22,11 @@
     <button class="btn btn-default" id="me" type="submit">Change Me</button>
     <button class="btn btn-default" id="refresh" type="submit">Refresh</button>
     <h3>Rooms</h3>
-    <select class="form-control" id="roomSelect">
-      <option>General</option>
+    <select class="form-control" id="roomSelect" onchange="if (this.selectedIndex) app.changeRoom(this.value);">
+      <option>Select Room</option>
     </select>
+    <input type="text" class="form-control" id="newroom" placeholder="Room name">
+    <button class="btn btn-default" id="submitroom" type="submit">Submit</button>
     <h3>Speak HERE</h3>
     <textarea class="form-control" id="speakHere" rows="3"></textarea>
     <button class="btn btn-default" id="post" type="submit">Post</button>
